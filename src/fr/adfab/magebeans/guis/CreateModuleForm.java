@@ -84,6 +84,7 @@ public class CreateModuleForm extends javax.swing.JDialog {
 
         org.openide.awt.Mnemonics.setLocalizedText(rbtnCommunity, org.openide.util.NbBundle.getMessage(CreateModuleForm.class, "CreateModuleForm.rbtnCommunity.text")); // NOI18N
 
+        rbtnLocal.setSelected(true);
         org.openide.awt.Mnemonics.setLocalizedText(rbtnLocal, org.openide.util.NbBundle.getMessage(CreateModuleForm.class, "CreateModuleForm.rbtnLocal.text")); // NOI18N
 
         org.openide.awt.Mnemonics.setLocalizedText(jLabel2, org.openide.util.NbBundle.getMessage(CreateModuleForm.class, "CreateModuleForm.jLabel2.text")); // NOI18N
@@ -202,13 +203,14 @@ public class CreateModuleForm extends javax.swing.JDialog {
             }
 
             createModuleProcess.process();
+            dispose();
         } catch (FileNotFoundException | IllegalArgumentException ex) {
             Exceptions.printStackTrace(ex);
         }
     }//GEN-LAST:event_btnCreateActionPerformed
 
     private void btnCancelActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnCancelActionPerformed
-        ((CreateModuleTopComponent) btnCancel.getParent()).close();
+        dispose();
     }//GEN-LAST:event_btnCancelActionPerformed
 
     /**
