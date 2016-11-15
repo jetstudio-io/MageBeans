@@ -49,14 +49,10 @@ public class CreateModuleProcess {
     protected Element configElement;
     protected Element globalElement;
 
-    protected ClassLoader classLoader;
-
     public CreateModuleProcess() {
         this.PATH_TEMP = "%s/app/code/%s/%s/%s";
         this.CONFIG_PATH = "etc/config.xml";
         this.MODULE_CONFIG_PATH = "%s/app/etc/modules/%s_%s.xml";
-
-        this.classLoader = this.getClass().getClassLoader();
     }
 
     public void setCompany(String company) {
@@ -176,18 +172,21 @@ public class CreateModuleProcess {
      */
     protected void _createModuleXmlFile() {
         try {
-            File moduleFileTemplate = this._getResourceFile("../templates/module.xml");
+            File moduleFileTemplate;
+            moduleFileTemplate = new File(getClass().getResource("/resources/templates/module.xml").getPath());
+            System.out.println(getClass().getResource("/resources/templates/module.xml").getPath());
+//            File moduleFileTemplate = this._getResourceFile("/resources/templates/module.xml");
             String fileContent = FileUtils.readFileToString(moduleFileTemplate, "UTF-8");
             fileContent = String.format(fileContent, this.moduleName, this.codePool, this.moduleName);
             String fileConfigPath = String.format(this.MODULE_CONFIG_PATH, this.projectDir, this.company, this.module);
             File fileConfig = new File (fileConfigPath);
-            FileOutputStream fos = new FileOutputStream(fileConfig);
-            if (!fileConfig.exists()) {
-                fileConfig.createNewFile();
+            try (FileOutputStream fos = new FileOutputStream(fileConfig)) {
+                if (!fileConfig.exists()) {
+                    fileConfig.createNewFile();
+                }
+                fos.write(fileContent.getBytes());
+                fos.flush();
             }
-            fos.write(fileContent.getBytes());
-            fos.flush();
-            fos.close();
         } catch (IOException e) {
             Exceptions.printStackTrace(e);
         }
@@ -204,7 +203,7 @@ public class CreateModuleProcess {
             String subDir = "sql/" + this.moduleNameLower + "_setup";
             this._createFolders(subDir);
             
-            File sourceFile = this._getResourceFile("../templates/mysql4-install-0.0.1.php");
+            File sourceFile = this._getResourceFile("/resources/templates/mysql4-install-0.0.1.php");
             File destDir = new File(this.moduleDir + "/" + subDir);
             FileUtils.copyFileToDirectory(sourceFile, destDir);
         } catch (IOException ex) {
@@ -213,7 +212,7 @@ public class CreateModuleProcess {
     }
 
     protected File _getResourceFile(String resourceFilePath) {
-        File tmp = new File(this.classLoader.getResource(resourceFilePath).getFile());
+        File tmp = new File(this.getClass().getResource(resourceFilePath).getFile());
         return tmp;
     }
 
