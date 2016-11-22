@@ -17,11 +17,15 @@ import javax.xml.transform.*;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.StringWriter;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import org.apache.commons.io.IOUtils;
 
 import org.openide.util.Exceptions;
 /**
@@ -137,7 +141,7 @@ public class CreateModuleProcess {
             // Create config for module version
             Element moduleElement = this.dom.createElement(this.moduleName);
             Element versionElement = this.dom.createElement("version");
-            versionElement.setTextContent("0.0.1");
+            versionElement.setTextContent("0.1.0");
             moduleElement.appendChild(versionElement);
             this.configElement.appendChild(moduleElement);
 
@@ -172,11 +176,7 @@ public class CreateModuleProcess {
      */
     protected void _createModuleXmlFile() {
         try {
-            File moduleFileTemplate;
-            moduleFileTemplate = new File(getClass().getResource("/resources/templates/module.xml").getPath());
-            System.out.println(getClass().getResource("/resources/templates/module.xml").getPath());
-//            File moduleFileTemplate = this._getResourceFile("/resources/templates/module.xml");
-            String fileContent = FileUtils.readFileToString(moduleFileTemplate, "UTF-8");
+            String fileContent = this._getResourceFile("module.xml");
             fileContent = String.format(fileContent, this.moduleName, this.codePool, this.moduleName);
             String fileConfigPath = String.format(this.MODULE_CONFIG_PATH, this.projectDir, this.company, this.module);
             File fileConfig = new File (fileConfigPath);
@@ -193,27 +193,42 @@ public class CreateModuleProcess {
     }
 
     protected void _createSetup() {
+        String xpath = "resources/" + this.moduleNameLower + "_setup/setup/module";
+        this._createNode(xpath, this.moduleName);
+        xpath = "resources/" + this.moduleNameLower + "_setup/connection/use";
+        this._createNode(xpath, "core_setup");
+        String subDir = "sql/" + this.moduleNameLower + "_setup";
+        this._createFolders(subDir);
+        
+        String setupFileName = subDir + "/mysql4-install-0.1.0.php";
+        File setupFile = new File(setupFileName);
+        String sourceFile = this._getResourceFile("mysql4-install-0.1.0.php");
         try {
-            String xpath = "resources/" + this.moduleNameLower + "_setup/setup/module";
-            this._createNode(xpath, this.moduleName);
-            
-            xpath = "resources/" + this.moduleNameLower + "_setup/connection/use";
-            this._createNode(xpath, "core_setup");
-            
-            String subDir = "sql/" + this.moduleNameLower + "_setup";
-            this._createFolders(subDir);
-            
-            File sourceFile = this._getResourceFile("/resources/templates/mysql4-install-0.0.1.php");
-            File destDir = new File(this.moduleDir + "/" + subDir);
-            FileUtils.copyFileToDirectory(sourceFile, destDir);
+            FileOutputStream fos = new FileOutputStream(setupFile);
+            if (!setupFile.exists()) {
+                setupFile.createNewFile();
+            }
+            fos.write(sourceFile.getBytes());
+            fos.flush();
+        } catch (FileNotFoundException ex) {
+            Exceptions.printStackTrace(ex);
         } catch (IOException ex) {
             Exceptions.printStackTrace(ex);
         }
+        
     }
 
-    protected File _getResourceFile(String resourceFilePath) {
-        File tmp = new File(this.getClass().getResource(resourceFilePath).getFile());
-        return tmp;
+    protected String _getResourceFile(String resourceFilePath) {
+        InputStream templateFile;
+        templateFile = getClass().getResourceAsStream("resourceFilePath");
+        StringWriter writer = new StringWriter();
+        try {
+            IOUtils.copy(templateFile, writer, "UTF-8");
+        } catch (IOException ex) {
+            Exceptions.printStackTrace(ex);
+        }
+        String fileContent = writer.toString();
+        return fileContent;
     }
 
     protected void _writeConfigXmlFile() {
