@@ -16,19 +16,19 @@ import org.openide.util.NbBundle.Messages;
 import org.openide.util.Utilities;
 
 @ActionID(
-        category = "PHP",
+        category = "MageBeans",
         id = "fr.adfab.magebeans.actions.CreateModuleAction"
 )
 @ActionRegistration(
         iconBase = "fr/adfab/magebeans/actions/icon.png",
-        displayName = "#CTL_CreateModuleAction"
+        displayName = "Create a module"
 )
 @ActionReferences({
     @ActionReference(path = "Menu/Source", position = 200, separatorAfter = 250)
     ,
   @ActionReference(path = "Toolbars/File", position = 500)
 })
-@Messages("CTL_CreateModuleAction=Create a module")
+
 public final class CreateModuleAction implements ActionListener {
 
     private final Project context;
